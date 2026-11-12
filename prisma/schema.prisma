@@ -1,0 +1,46 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Student {
+  studentId   Int          @id @default(autoincrement()) @map("student_id")
+  firstName   String       @map("first_name") @db.VarChar(50)
+  lastName    String       @map("last_name") @db.VarChar(50)
+  email       String       @unique @db.VarChar(100)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  
+  isDeleted   Boolean      @default(false) @map("is_deleted")
+  deletedAt   DateTime?    @map("deleted_at")
+
+  readingLogs ReadingLog[]
+
+  @@map("students")
+}
+
+model Book {
+  bookId        Int          @id @default(autoincrement()) @map("book_id")
+  title         String       @db.VarChar(150)
+  author        String       @db.VarChar(100)
+  publishedYear Int?         @map("published_year")
+  readingLogs   ReadingLog[]
+
+  @@map("books")
+}
+
+model ReadingLog {
+  logId        Int       @id @default(autoincrement()) @map("log_id")
+  studentId    Int       @map("student_id")
+  bookId       Int       @map("book_id")
+  dateFinished DateTime  @map("date_finished") @db.Date
+  rating       Int?
+
+  student      Student   @relation(fields: [studentId], references: [studentId], onDelete: Cascade)
+  book         Book      @relation(fields: [bookId], references: [bookId], onDelete: Cascade)
+
+  @@map("reading_log")
+}
